@@ -5,6 +5,18 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
     <title>piTunes</title>
+    <link rel="apple-touch-icon-precomposed" sizes="57x57" href="favico/apple-touch-icon-57x57.png" />
+    <link rel="apple-touch-icon-precomposed" sizes="114x114" href="favico/apple-touch-icon-114x114.png" />
+    <link rel="apple-touch-icon-precomposed" sizes="72x72" href="favico/apple-touch-icon-72x72.png" />
+    <link rel="apple-touch-icon-precomposed" sizes="144x144" href="favico/apple-touch-icon-144x144.png" />
+    <link rel="apple-touch-icon-precomposed" sizes="120x120" href="favico/apple-touch-icon-120x120.png" />
+    <link rel="apple-touch-icon-precomposed" sizes="152x152" href="favico/apple-touch-icon-152x152.png" />
+    <link rel="icon" type="image/png" href="favico/favicon-32x32.png" sizes="32x32" />
+    <link rel="icon" type="image/png" href="favico/favicon-16x16.png" sizes="16x16" />
+    <meta name="application-name" content="piTunes"/>
+    <meta name="msapplication-TileColor" content="#FFFFFF" />
+    <meta name="msapplication-TileImage" content="favico/mstile-144x144.png" />
+    
     <style>
         body {
             background-color: #222228;
@@ -183,7 +195,7 @@
             <img src="" />
             <div>
                 <div id="divAlbumInfo"></div>
-                <div id="divTrackInfo"></div>
+                <span id="divTrackInfo"></span><a id="btnNext"><svg width="40" height="20"><circle style="fill:white" cx="20" r="8" cy="12"></circle><path stroke="black" stroke-width="1" d="M18,8 l4,4 l-4,4 Z"></path><path stroke="black" stroke-width="1" d="M23,7 v10"></path></svg></a>
             </div>
         </div>
         <audio id="audio" controls></audio>
@@ -192,19 +204,38 @@
     <script>
         var audioFileExts = ['mp3','m4a'];
         var albums = [];
+        var queuedTracks = [];
         
         document.addEventListener('DOMContentLoaded', function() {
             loadAlbums();
             document.getElementById('audio').addEventListener('ended', function() {
-                setRandomTrack(true);
+                setNextTrack(true);
+            });
+            document.getElementById('audio').addEventListener('play', function() {
+                setAlbumAndTrackInfo(this.getAttribute('src'));
+            });
+            document.getElementById('btnNext').addEventListener('click', function() {
+                setNextTrack(true);
             });
             document.getElementById('divAlbums').addEventListener('click', function(e) {
-                if(e.target.tagName != 'IMG') return;
+                if (e.target.tagName != 'IMG') return;
+                showAlbumDialog(e.target.getAttribute('src').replace('Folder.jpg', ''));
+            });
+            document.querySelector('#divNowPlaying img').addEventListener('click', function(e) {
                 showAlbumDialog(e.target.getAttribute('src').replace('Folder.jpg', ''));
             });
             document.querySelector('.modal-content').addEventListener('click', function(e) {
-                if(e.target.tagName != 'A') return;
-                alert(e.target.innerHTML);
+                if (e.target.tagName != 'A') return;
+                queuedTracks = [];
+                if (e.target.parentElement.tagName == 'LI') {
+                    queuedTracks.push(e.target.getAttribute('data-href'));
+                } else {  // queue the album
+                    var tracks = e.target.parentElement.parentElement.querySelectorAll('li > a');
+                    console.log(tracks);
+                    for (var i = 0; i < tracks.length; i++) 
+                        queuedTracks.push(tracks[i].getAttribute('data-href'));
+                }
+                setNextTrack(true);
             });
         });
 
@@ -229,7 +260,7 @@
                         container.appendChild(img);
                     }
                     document.getElementById('divAlbums').appendChild(container);
-                    setRandomTrack(false);
+                    setNextTrack(false);
                     loadImages();
                 }
             };
@@ -238,10 +269,15 @@
         }
 
 
-        function setRandomTrack(beginPlaying) {
+        function setNextTrack(beginPlaying) {
+            if (queuedTracks.length > 0) {
+                var track = queuedTracks.shift();
+                document.getElementById('audio').setAttribute('src', track);
+                document.getElementById('audio').play();
+                return;
+            }
+
             var album = albums[Math.floor(Math.random() * albums.length)];
-            document.querySelector('#divNowPlaying img').src = album.url + 'Folder.jpg';
-            document.getElementById('divAlbumInfo').innerText = album.name;
 
             var xhr = new XMLHttpRequest();
             xhr.onreadystatechange = function() {
@@ -260,14 +296,26 @@
 
                     var rnd = Math.floor(Math.random() * tracks.length);
                     var track = tracks[rnd];
-                    document.getElementById('divTrackInfo').innerText = decodeURIComponent(track.substr(0, track.length-4));
-                    document.getElementById('audio').setAttribute('src', xhr.responseURL + track);
+                    var src = xhr.responseURL + track;
+                    document.getElementById('audio').setAttribute('src', src);
                     if (beginPlaying) document.getElementById('audio').play();
+                    else setAlbumAndTrackInfo(src);
                 }
             };
 
             xhr.open('GET', album.url, true);
             xhr.send();
+        }
+
+
+        function setAlbumAndTrackInfo(trackUrl) {
+            var a = document.createElement('a');
+            a.href = trackUrl;
+            var path = a.pathname;
+            var parts = path.substr(1).split('/');
+            document.querySelector('#divNowPlaying img').src = parts[0] + '/' + parts[1] + '/Folder.jpg';
+            document.getElementById('divAlbumInfo').innerText = decodeURIComponent(parts[1]);
+            document.getElementById('divTrackInfo').innerText = decodeURIComponent(parts[2].substr(0, parts[2].length-4));
         }
 
 
@@ -296,7 +344,7 @@
                         var li = document.createElement('li');
                         var a = document.createElement('a');
                         a.innerText = decodeURIComponent(href);
-                        a.setAttribute('data-href', href);
+                        a.setAttribute('data-href', url + href);
                         li.appendChild(a);
                         ul.appendChild(li);
                     }
