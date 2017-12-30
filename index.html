@@ -1,0 +1,297 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>piTunes</title>
+    <style>
+        body {
+            background-color: #222228;
+            width: 100%;
+            max-width: 1060px;
+            position: relative;
+            margin: 0 auto;
+            padding: 30px 0 150px 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        #divAlbums {
+            box-shadow: 0px -12px 26px 0px rgba(0,0,0,0.75);
+        }
+
+        #divPlayer {
+            position: fixed;
+            bottom: 0;
+            width: 100%;
+            max-width: 1060px;
+            background-color: rgba(0,0,0,0.85);
+            z-index: 999;
+            padding: 0.5em;
+            box-sizing: border-box;
+            color: white;
+        }
+
+        #divNowPlaying {
+            display: inline-block;
+        }
+
+        #divNowPlaying img {
+            width: 60px;
+            display: inline-block;
+            vertical-align: middle;
+        }
+
+        #divNowPlaying > div {
+            display: inline-block;
+            vertical-align: middle;
+        }
+
+        #divAlbumInfo {
+            font-weight: bold;
+            font-size: 80%;
+        }
+
+        #divTrackInfo {
+            font-size: 75%;
+        }
+
+        audio {
+            display: block;
+            width: 100%;
+        }
+
+        img {
+            border: none;
+            box-sizing: border-box;
+            padding: 1px;
+            cursor: pointer;
+            display: inline-block;
+            width: 50.0%;
+        }
+
+        @media screen and (min-width : 401px) {
+            img {
+                width: 33.3%;
+            }
+        }
+        @media screen and (min-width : 601px) {
+            img {
+                width: 25.0%;
+            }
+        }
+        @media screen and (min-width : 801px) {
+            img {
+                width: 20.0%;
+            }
+        }
+
+.modal-container .modal-content,
+.modal-container .modal-backdrop {
+  height: 0;
+  width: 0;
+  opacity: 0;
+  visibility: hidden;
+  overflow: hidden;
+  cursor: pointer;
+  transition: opacity 0.2s ease-in;
+}
+.modal-container .modal-close {
+  color: #aaa;
+  position: absolute;
+  right: 5px;
+  top: 5px;
+  padding-top: 3px;
+  font-size: 16px;
+  width: 25px;
+  height: 25px;
+  font-weight: bold;
+  text-align: center;
+  cursor: pointer;
+}
+.modal-container .modal-close:hover {
+  color: white;
+}
+.modal-container #modal-toggle {
+  display: none;
+}
+.modal-container #modal-toggle.active ~ .modal-backdrop, .modal-container #modal-toggle:checked ~ .modal-backdrop {
+  background-color: rgba(0, 0, 0, 0.6);
+  width: 100vw;
+  height: 100vh;
+  position: fixed;
+  left: 0;
+  top: 0;
+  z-index: 9;
+  visibility: visible;
+  opacity: 1;
+  transition: opacity 0.2s ease-in;
+}
+.modal-container #modal-toggle.active ~ .modal-content, .modal-container #modal-toggle:checked ~ .modal-content {
+  opacity: 1;
+  background-color: rgba(0,0,0,0.85);
+  color: white;
+  max-width: 400px;
+  width: 400px;
+  height: 280px;
+  padding: 10px 30px;
+  position: fixed;
+  left: calc(50% - 200px);
+  top: 12%;
+  border-radius: 4px;
+  z-index: 999;
+  pointer-events: auto;
+  cursor: auto;
+  visibility: visible;
+  box-shadow: 0 3px 7px rgba(0, 0, 0, 0.6);
+  font-size: 75%;
+}
+    </style>
+</head>
+<body>
+    
+
+    <div class="modal-container">
+        <input id="modal-toggle" type="checkbox">
+        <label class="modal-backdrop" for="modal-toggle"></label>
+        <div class="modal-content">
+            <label class="modal-close" for="modal-toggle">&#x2715;</label>
+            <h2 id="modalTitle"></h2>
+            <ul id="modalTrackList"></p> 
+        </div>          
+    </div> 
+
+    <div id="divAlbums"></div>
+
+    <div id="divPlayer">
+        <div id="divNowPlaying">
+            <img src="" />
+            <div>
+                <div id="divAlbumInfo"></div>
+                <div id="divTrackInfo"></div>
+            </div>
+        </div>
+        <audio id="audio" controls></audio>
+    </div> 
+
+    <script>
+        var audioFileExts = ['mp3','m4a'];
+        var albums = [];
+        
+        document.addEventListener('DOMContentLoaded', function() {
+            loadAlbums();
+            document.getElementById('audio').addEventListener('ended', function() {
+                setRandomTrack(true);
+            });
+            document.getElementById('divAlbums').addEventListener('click', function(e) {
+                if(e.target.tagName != 'IMG') return;
+                showAlbumDialog(e.target.getAttribute('src').replace('Folder.jpg', ''));
+            });
+        });
+
+
+        function loadAlbums() {
+            var xhr = new XMLHttpRequest();
+            xhr.onreadystatechange = function() {
+                if (xhr.readyState === XMLHttpRequest.DONE && xhr.status == 200) {
+                    var div = document.createElement('div');
+                    div.innerHTML = xhr.responseText;
+                    var links = div.querySelectorAll('a');
+                    var container = document.createElement('div');
+                    for (var i = 0; i < links.length; i++) {
+                        var href = links[i].getAttribute('href');
+                        if (href == '../') continue;
+                        var link = document.createElement('a');
+                        link.href = 'Music/' + href;
+                        var url = link.protocol + '//' + link.host + link.pathname;
+                        albums.push({ name: decodeURIComponent(href.substr(0, href.length-1)), url: url, tracks: [] });
+                        var img = document.createElement('img');
+                        img.setAttribute('data-src', url + 'Folder.jpg');
+                        container.appendChild(img);
+                    }
+                    document.getElementById('divAlbums').appendChild(container);
+                    setRandomTrack(false);
+                    loadImages();
+                }
+            };
+            xhr.open('GET', 'Music', true);
+            xhr.send();
+        }
+
+
+        function setRandomTrack(beginPlaying) {
+            var album = albums[Math.floor(Math.random() * albums.length)];
+            document.querySelector('#divNowPlaying img').src = album.url + 'Folder.jpg';
+            document.getElementById('divAlbumInfo').innerText = album.name;
+
+            var xhr = new XMLHttpRequest();
+            xhr.onreadystatechange = function() {
+                if (xhr.readyState === XMLHttpRequest.DONE && xhr.status == 200) {
+                    var div = document.createElement('div');
+                    div.innerHTML = xhr.responseText;
+                    var links = div.querySelectorAll('a');
+                    var tracks = [];
+
+                    for (var i = 0; i < links.length; i++) {
+                        var href = links[i].getAttribute('href');
+                        var ext = href.substr(href.length - 3).toLowerCase();
+                        if (href == '../' || audioFileExts.indexOf(ext) < 0) continue;
+                        tracks.push(href);
+                    }
+
+                    var rnd = Math.floor(Math.random() * tracks.length);
+                    var track = tracks[rnd];
+                    document.getElementById('divTrackInfo').innerText = decodeURIComponent(track.substr(0, track.length-4));
+                    document.getElementById('audio').setAttribute('src', xhr.responseURL + track);
+                    if (beginPlaying) document.getElementById('audio').play();
+                }
+            };
+
+            xhr.open('GET', album.url, true);
+            xhr.send();
+        }
+
+
+        function loadImages() {
+            var imgs = document.querySelectorAll('#divAlbums img');
+            for (var i = 0; i < imgs.length; i++) {
+                imgs[i].setAttribute('src', imgs[i].getAttribute('data-src'));
+            }
+        }
+
+
+        function showAlbumDialog(url) {
+            var xhr = new XMLHttpRequest();
+            xhr.onreadystatechange = function() {
+                if (xhr.readyState === XMLHttpRequest.DONE && xhr.status == 200) {
+                    var div = document.createElement('div');
+                    div.innerHTML = xhr.responseText;
+                    var links = div.querySelectorAll('a');
+                    var ul = document.getElementById('modalTrackList');
+                    ul.innerHTML = '';
+
+                    for (var i = 0; i < links.length; i++) {
+                        var href = links[i].getAttribute('href');
+                        var ext = href.substr(href.length - 3).toLowerCase();
+                        if (href == '../' || audioFileExts.indexOf(ext) < 0) continue;
+                        var li = document.createElement('li');
+                        li.innerText = decodeURIComponent(href);
+                        ul.appendChild(li);
+                    }
+
+                    var a = document.createElement('a');
+                    a.href = url;
+                    console.log(a.pathname);
+                    var title = decodeURIComponent(a.pathname.replace('Music/', '').replace('/', ''));
+                    document.getElementById('modalTitle').innerText = title;
+                    document.getElementById('modal-toggle').dispatchEvent(new MouseEvent('click', { 'view': window, 'bubbles': true, 'cancelable': false }));
+                }
+            };
+
+            xhr.open('GET', url, true);
+            xhr.send();
+        }
+
+    </script>
+</body>
+</html>
