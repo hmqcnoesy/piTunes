@@ -231,7 +231,6 @@
                     queuedTracks.push(e.target.getAttribute('data-href'));
                 } else {  // queue the album
                     var tracks = e.target.parentElement.parentElement.querySelectorAll('li > a');
-                    console.log(tracks);
                     for (var i = 0; i < tracks.length; i++) 
                         queuedTracks.push(tracks[i].getAttribute('data-href'));
                 }
@@ -254,7 +253,8 @@
                         var link = document.createElement('a');
                         link.href = 'Music/' + href;
                         var url = link.protocol + '//' + link.host + link.pathname;
-                        albums.push({ name: decodeURIComponent(href.substr(0, href.length-1)), url: url, tracks: [] });
+                        var name = decodeURIComponent(href.substr(0, href.length-1))
+                        if (!name.substr(0,1) != '-') albums.push({ name: name, url: url, tracks: [] });
                         var img = document.createElement('img');
                         img.setAttribute('data-src', url + 'Folder.jpg');
                         container.appendChild(img);
@@ -344,7 +344,9 @@
                         var li = document.createElement('li');
                         var a = document.createElement('a');
                         a.innerText = decodeURIComponent(href);
-                        a.setAttribute('data-href', url + href);
+                        a.setAttribute('href', href);
+                        a.setAttribute('data-href', a.getAttribute('href'));
+                        a.removeAttribute('href');
                         li.appendChild(a);
                         ul.appendChild(li);
                     }
@@ -352,7 +354,8 @@
                     var a = document.createElement('a');
                     a.setAttribute('href', url);
                     a.setAttribute('data-href', url);
-                    var title = decodeURIComponent(a.pathname.replace('Music/', '').replace('/', ''));
+                    var title = decodeURIComponent(a.pathname.replace('/Music/', '').replace('/', ''));
+                    if (title.substr(0,1) == '-') title = title.substr(1);
                     a.innerHTML = title;
                     a.removeAttribute('href');
                     document.getElementById('modalTitle').innerHTML = '';
