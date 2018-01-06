@@ -73,10 +73,20 @@
             width: 100%;
         }
 
-        ul {
-            padding-left: 1.2em;
+        #modalTrackList {
             height: 85%;
             overflow-y: auto;
+        }
+
+        div.list {
+            margin-bottom: 1em;
+        }
+
+        div.list img {
+            width: 40px;
+            vertical-align: middle;
+            float: left;
+            margin-right: 1em;
         }
 
         a {
@@ -184,7 +194,7 @@
         <div class="modal-content">
             <label class="modal-close" for="modal-toggle">&#x2715;</label>
             <h2 id="modalTitle"></h2>
-            <ul id="modalTrackList"></p> 
+            <div id="modalTrackList"></p> 
         </div>          
     </div> 
 
@@ -195,7 +205,9 @@
             <img src="" />
             <div>
                 <div id="divAlbumInfo"></div>
-                <span id="divTrackInfo"></span><a id="btnNext"><svg width="40" height="20"><circle style="fill:white" cx="20" r="8" cy="12"></circle><path stroke="black" stroke-width="1" d="M18,8 l4,4 l-4,4 Z"></path><path stroke="black" stroke-width="1" d="M23,7 v10"></path></svg></a>
+                <span id="divTrackInfo"></span>
+                <a id="btnNext"><svg width="40" height="20"><circle style="fill:white" cx="20" r="8" cy="12"></circle><path stroke="black" stroke-width="1" d="M18,8 l4,4 l-4,4 Z"></path><path stroke="black" stroke-width="1" d="M23,7 v10"></path></svg></a>
+                <a id="btnPlayed"><svg width="40" height="20"><circle style="fill:white" cx="20" r="8" cy="12"></circle><path stroke="black" stroke-width="1" d="M17,9 l6,0 l0,-1 l-6,0 Z"></path><path stroke="black" stroke-width="1" d="M17,13 l6,0 l0,-1 l-6,0 Z"></path><path stroke="black" stroke-width="1" d="M17,17 l6,0 l0,-1 l-6,0 Z"></path></svg></a>
             </div>
         </div>
         <audio id="audio" controls></audio>
@@ -205,6 +217,7 @@
         var audioFileExts = ['mp3','m4a'];
         var albums = [];
         var queuedTracks = [];
+        var playedTracks = [];
         
         document.addEventListener('DOMContentLoaded', function() {
             loadAlbums();
@@ -213,9 +226,13 @@
             });
             document.getElementById('audio').addEventListener('play', function() {
                 setAlbumAndTrackInfo(this.getAttribute('src'));
+                playedTracks.unshift(this.getAttribute('src'));
             });
             document.getElementById('btnNext').addEventListener('click', function() {
                 setNextTrack(true);
+            });
+            document.getElementById('btnPlayed').addEventListener('click', function() {
+                showPlayedDialog();
             });
             document.getElementById('divAlbums').addEventListener('click', function(e) {
                 if (e.target.tagName != 'IMG') return;
@@ -227,10 +244,10 @@
             document.querySelector('.modal-content').addEventListener('click', function(e) {
                 if (e.target.tagName != 'A') return;
                 queuedTracks = [];
-                if (e.target.parentElement.tagName == 'LI') {
+                if (e.target.parentElement.classList.contains('list')) {
                     queuedTracks.push(e.target.getAttribute('data-href'));
                 } else {  // queue the album
-                    var tracks = e.target.parentElement.parentElement.querySelectorAll('li > a');
+                    var tracks = e.target.parentElement.parentElement.querySelectorAll('.list a');
                     for (var i = 0; i < tracks.length; i++) 
                         queuedTracks.push(tracks[i].getAttribute('data-href'));
                 }
@@ -331,24 +348,25 @@
             var xhr = new XMLHttpRequest();
             xhr.onreadystatechange = function() {
                 if (xhr.readyState === XMLHttpRequest.DONE && xhr.status == 200) {
-                    var div = document.createElement('div');
-                    div.innerHTML = xhr.responseText;
-                    var links = div.querySelectorAll('a');
-                    var ul = document.getElementById('modalTrackList');
-                    ul.innerHTML = '';
+                    var dummy = document.createElement('div');
+                    dummy.innerHTML = xhr.responseText;
+                    var links = dummy.querySelectorAll('a');
+                    var list = document.getElementById('modalTrackList');
+                    list.innerHTML = '';
 
                     for (var i = 0; i < links.length; i++) {
                         var href = links[i].getAttribute('href');
                         var ext = href.substr(href.length - 3).toLowerCase();
                         if (href == '../' || audioFileExts.indexOf(ext) < 0) continue;
-                        var li = document.createElement('li');
+                        var div = document.createElement('div');
+                        div.classList.add('list');
                         var a = document.createElement('a');
                         a.innerText = decodeURIComponent(href);
-                        a.setAttribute('href', href);
+                        a.setAttribute('href', url + links[i].getAttribute('href'));
                         a.setAttribute('data-href', a.getAttribute('href'));
                         a.removeAttribute('href');
-                        li.appendChild(a);
-                        ul.appendChild(li);
+                        div.appendChild(a);
+                        list.appendChild(div);
                     }
 
                     var a = document.createElement('a');
@@ -366,6 +384,31 @@
 
             xhr.open('GET', url, true);
             xhr.send();
+        }
+
+
+        function showPlayedDialog() {
+            var list = document.getElementById('modalTrackList');
+            list.innerHTML = '';
+
+            for (var i = 0; i < playedTracks.length; i++) {
+                var div = document.createElement('div');
+                div.classList.add('list');
+                var a = document.createElement('a');
+                a.setAttribute('href', playedTracks[i]);
+                a.innerText = decodeURIComponent(a.pathname.replace('/Music/', ''));
+                var img = document.createElement('img');
+                var srcParts = a.pathname.split('/');
+                img.setAttribute('src', a.protocol + '//' + a.host + '/' + srcParts[1] + '/' + srcParts[2] + '/' + 'Folder.jpg');
+                a.setAttribute('data-href', a.getAttribute('href'));
+                a.removeAttribute('href');
+                div.appendChild(img);
+                div.appendChild(a);
+                list.appendChild(div);
+            }
+
+            document.getElementById('modalTitle').innerText = 'Recently Played';
+            document.getElementById('modal-toggle').dispatchEvent(new MouseEvent('click', { 'view': window, 'bubbles': true, 'cancelable': false }));
         }
 
     </script>
