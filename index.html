@@ -80,6 +80,7 @@
 
         div.list {
             margin-bottom: 1em;
+			min-height: 40px;
         }
 
         div.list img {
@@ -362,9 +363,14 @@
                         div.classList.add('list');
                         var a = document.createElement('a');
                         a.innerText = decodeURIComponent(href);
+						var img = document.createElement('img');
+						var srcParts = a.pathname.split('/');
+						console.log(srcParts);
+						img.setAttribute('src', url + 'Folder.jpg');
                         a.setAttribute('href', url + links[i].getAttribute('href'));
                         a.setAttribute('data-href', a.getAttribute('href'));
                         a.removeAttribute('href');
+						div.appendChild(img);
                         div.appendChild(a);
                         list.appendChild(div);
                     }
