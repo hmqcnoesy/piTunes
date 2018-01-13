@@ -5,17 +5,17 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
     <title>piTunes</title>
-    <link rel="apple-touch-icon-precomposed" sizes="57x57" href="favico/apple-touch-icon-57x57.png" />
-    <link rel="apple-touch-icon-precomposed" sizes="114x114" href="favico/apple-touch-icon-114x114.png" />
-    <link rel="apple-touch-icon-precomposed" sizes="72x72" href="favico/apple-touch-icon-72x72.png" />
-    <link rel="apple-touch-icon-precomposed" sizes="144x144" href="favico/apple-touch-icon-144x144.png" />
-    <link rel="apple-touch-icon-precomposed" sizes="120x120" href="favico/apple-touch-icon-120x120.png" />
-    <link rel="apple-touch-icon-precomposed" sizes="152x152" href="favico/apple-touch-icon-152x152.png" />
-    <link rel="icon" type="image/png" href="favico/favicon-32x32.png" sizes="32x32" />
-    <link rel="icon" type="image/png" href="favico/favicon-16x16.png" sizes="16x16" />
+    <link rel="apple-touch-icon-precomposed" sizes="57x57" href="img/apple-touch-icon-57x57.png" />
+    <link rel="apple-touch-icon-precomposed" sizes="114x114" href="img/apple-touch-icon-114x114.png" />
+    <link rel="apple-touch-icon-precomposed" sizes="72x72" href="img/apple-touch-icon-72x72.png" />
+    <link rel="apple-touch-icon-precomposed" sizes="144x144" href="img/apple-touch-icon-144x144.png" />
+    <link rel="apple-touch-icon-precomposed" sizes="120x120" href="img/apple-touch-icon-120x120.png" />
+    <link rel="apple-touch-icon-precomposed" sizes="152x152" href="img/apple-touch-icon-152x152.png" />
+    <link rel="icon" type="image/png" href="img/favicon-32x32.png" sizes="32x32" />
+    <link rel="icon" type="image/png" href="img/favicon-16x16.png" sizes="16x16" />
     <meta name="application-name" content="piTunes"/>
     <meta name="msapplication-TileColor" content="#FFFFFF" />
-    <meta name="msapplication-TileImage" content="favico/mstile-144x144.png" />
+    <meta name="msapplication-TileImage" content="img/mstile-144x144.png" />
     
     <style>
         body {
@@ -26,6 +26,13 @@
             margin: 0 auto;
             padding: 30px 0 150px 0;
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        input[type="text"] {
+            border-radius: 5px;
+            border: none;
+            padding: 0.3em;
+            box-sizing: border-box;
         }
 
         #divAlbums {
@@ -42,6 +49,19 @@
             padding: 0.5em;
             box-sizing: border-box;
             color: white;
+        }
+
+        #divSearch {
+            text-align: right;
+        }
+
+        #divButtons {
+            width: 40px;
+            float: right;
+        }
+
+        #divButtons a {
+            display: block;
         }
 
         #divNowPlaying {
@@ -190,29 +210,33 @@
     
 
     <div class="modal-container">
-        <input id="modal-toggle" type="checkbox">
+        <input id="modal-toggle" type="checkbox" />
         <label class="modal-backdrop" for="modal-toggle"></label>
         <div class="modal-content">
             <label class="modal-close" for="modal-toggle">&#x2715;</label>
             <h2 id="modalTitle"></h2>
-            <div id="modalTrackList"></p> 
+            <div id="modalTrackList"></div> 
         </div>          
     </div> 
 
     <div id="divAlbums"></div>
 
     <div id="divPlayer">
+        <div id="divSearch" style="display:none"><input type="text" id="txtSearch"></div>
         <div id="divNowPlaying">
-            <img src="" />
+            <img src="">
             <div>
                 <div id="divAlbumInfo"></div>
                 <span id="divTrackInfo"></span>
-                <a id="btnNext"><svg width="40" height="20"><circle style="fill:white" cx="20" r="8" cy="12"></circle><path stroke="black" stroke-width="1" d="M18,8 l4,4 l-4,4 Z"></path><path stroke="black" stroke-width="1" d="M23,7 v10"></path></svg></a>
-                <a id="btnPlayed"><svg width="40" height="20"><circle style="fill:white" cx="20" r="8" cy="12"></circle><path stroke="black" stroke-width="1" d="M17,9 l6,0 l0,-1 l-6,0 Z"></path><path stroke="black" stroke-width="1" d="M17,13 l6,0 l0,-1 l-6,0 Z"></path><path stroke="black" stroke-width="1" d="M17,17 l6,0 l0,-1 l-6,0 Z"></path></svg></a>
             </div>
         </div>
+        <div id="divButtons">
+            <a id="btnSearch"><svg width="40" height="20"><circle style="fill:white" cx="20" r="8" cy="12"></circle><circle style="stroke:black;stroke-width:1;" cx="18" cy="10" r="4"></circle><circle style="fill:white" cx="18" cy="10" r="2"></circle><line x1="20" y1="12" x2="25" y2="16" style="stroke:black;stroke-width:2.5"></line></svg></a>
+            <a id="btnPlayed"><svg width="40" height="20"><circle style="fill:white" cx="20" r="8" cy="12"></circle><line x1="19" y1="5" x2="19" y2="13" style="stroke:black;stroke-width:2"></line><line x1="18.5" y1="13" x2="25" y2="15" style="stroke:black;stroke-width:2"></line></svg></a>
+            <a id="btnNext"><svg width="40" height="20"><circle style="fill:white" cx="20" r="8" cy="12"></circle><path stroke="black" stroke-width="1" d="M18,8 l4,4 l-4,4 Z"></path><path stroke="black" stroke-width="1" d="M23,7 v10"></path></svg></a>
+        </div>
         <audio id="audio" controls></audio>
-    </div> 
+    </div>
 
     <script>
         var audioFileExts = ['mp3','m4a'];
@@ -226,8 +250,19 @@
                 setNextTrack(true);
             });
             document.getElementById('audio').addEventListener('play', function() {
-                setAlbumAndTrackInfo(this.getAttribute('src'));
-                playedTracks.unshift(this.getAttribute('src'));
+                var src = this.getAttribute('src')
+                setAlbumAndTrackInfo(src);
+                if (playedTracks.length == 0 || playedTracks[0] != src) playedTracks.unshift(src);
+            });
+            document.getElementById('btnSearch').addEventListener('click', function() {
+                var divSearch = document.getElementById('divSearch');
+                if (divSearch.hasAttribute('style')) {
+                    divSearch.removeAttribute('style');
+                    document.getElementById('txtSearch').focus();
+                } else {
+                    document.getElementById('txtSearch').value = '';
+                    divSearch.setAttribute('style', 'display:none');
+                }
             });
             document.getElementById('btnNext').addEventListener('click', function() {
                 setNextTrack(true);
@@ -365,7 +400,6 @@
                         a.innerText = decodeURIComponent(href);
 						var img = document.createElement('img');
 						var srcParts = a.pathname.split('/');
-						console.log(srcParts);
 						img.setAttribute('src', url + 'Folder.jpg');
                         a.setAttribute('href', url + links[i].getAttribute('href'));
                         a.setAttribute('data-href', a.getAttribute('href'));
