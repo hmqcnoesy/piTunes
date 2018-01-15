@@ -268,6 +268,9 @@
                     divSearch.setAttribute('style', 'display:none');
                 }
             });
+            document.getElementById('txtSearch').addEventListener('input', function() {
+                filterDisplayedAlbums();
+            });
             document.getElementById('btnNext').addEventListener('click', function() {
                 setNextTrack(true);
             });
@@ -380,6 +383,29 @@
             var imgs = document.querySelectorAll('#divAlbums img');
             for (var i = 0; i < imgs.length; i++) {
                 imgs[i].setAttribute('src', imgs[i].getAttribute('data-src'));
+            }
+        }
+
+
+        function filterDisplayedAlbums() {
+            var txt = document.getElementById('txtSearch').value;
+            if (txt.length <= 3) {
+                var toShow = document.querySelectorAll('#divAlbums img[style="display:none"]');
+                for (var i = 0; i < toShow.length; i++) 
+                    toShow[i].removeAttribute('style');
+            } else {
+                var searchTerms = txt.split(' ');
+                var imgs = document.querySelectorAll('#divAlbums img');
+                for (var i = 0; i < imgs.length; i++) {
+                    var tokens = imgs[i].getAttribute('src').split('/');
+                    tokens = decodeURIComponent(tokens[tokens.length-2]).split(' ');
+                    for (var j = 0; j < searchTerms.length; j++) {
+                        if (tokens.indexOf(searchTerms[j]) < 0) {
+                            imgs[i].setAttribute('style', 'display:none');
+                            break;
+                        }
+                    }
+                }
             }
         }
 
