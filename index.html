@@ -400,9 +400,8 @@
                     var tokens = imgs[i].getAttribute('src').split('/');
                     tokens = decodeURIComponent(tokens[tokens.length-2]).split(' ');
                     for (var j = 0; j < searchTerms.length; j++) {
-                        if (tokens.indexOf(searchTerms[j]) < 0) {
-                            imgs[i].setAttribute('style', 'display:none');
-                            break;
+                        for (var k = 0; k < tokens.length; k++) {
+                            
                         }
                     }
                 }
