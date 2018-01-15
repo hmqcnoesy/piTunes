@@ -46,26 +46,26 @@
             max-width: 1060px;
             background-color: rgba(0,0,0,0.85);
             z-index: 999;
-            padding: 0.5em;
+            padding: 5px;
             box-sizing: border-box;
             color: white;
         }
 
         #divSearch {
             text-align: right;
+            padding-bottom: 5px;
         }
 
         #divButtons {
             width: 40px;
-            float: right;
         }
 
         #divButtons a {
             display: block;
         }
 
-        #divNowPlaying {
-            display: inline-block;
+        #divImg { 
+            width: 60px;
         }
 
         #divNowPlaying img {
@@ -77,6 +77,10 @@
         #divNowPlaying > div {
             display: inline-block;
             vertical-align: middle;
+        }
+
+        #divInfo {
+            width: calc(100% - 110px);
         }
 
         #divAlbumInfo {
@@ -224,16 +228,16 @@
     <div id="divPlayer">
         <div id="divSearch" style="display:none"><input type="text" id="txtSearch"></div>
         <div id="divNowPlaying">
-            <img src="">
-            <div>
+            <div id="divImg"><img src=""></div>
+            <div id="divInfo">
                 <div id="divAlbumInfo"></div>
-                <span id="divTrackInfo"></span>
+                <div id="divTrackInfo"></div>
             </div>
-        </div>
-        <div id="divButtons">
-            <a id="btnSearch"><svg width="40" height="20"><circle style="fill:white" cx="20" r="8" cy="12"></circle><circle style="stroke:black;stroke-width:1;" cx="18" cy="10" r="4"></circle><circle style="fill:white" cx="18" cy="10" r="2"></circle><line x1="20" y1="12" x2="25" y2="16" style="stroke:black;stroke-width:2.5"></line></svg></a>
-            <a id="btnPlayed"><svg width="40" height="20"><circle style="fill:white" cx="20" r="8" cy="12"></circle><line x1="19" y1="5" x2="19" y2="13" style="stroke:black;stroke-width:2"></line><line x1="18.5" y1="13" x2="25" y2="15" style="stroke:black;stroke-width:2"></line></svg></a>
-            <a id="btnNext"><svg width="40" height="20"><circle style="fill:white" cx="20" r="8" cy="12"></circle><path stroke="black" stroke-width="1" d="M18,8 l4,4 l-4,4 Z"></path><path stroke="black" stroke-width="1" d="M23,7 v10"></path></svg></a>
+            <div id="divButtons">
+                <a id="btnSearch"><svg width="40" height="20"><circle style="fill:white" cx="20" r="8" cy="12"></circle><circle style="stroke:black;stroke-width:1;" cx="18" cy="10" r="4"></circle><circle style="fill:white" cx="18" cy="10" r="2"></circle><line x1="20" y1="12" x2="25" y2="16" style="stroke:black;stroke-width:2.5"></line></svg></a>
+                <a id="btnPlayed"><svg width="40" height="20"><circle style="fill:white" cx="20" r="8" cy="12"></circle><line x1="19" y1="5" x2="19" y2="13" style="stroke:black;stroke-width:2"></line><line x1="18.5" y1="13" x2="25" y2="15" style="stroke:black;stroke-width:2"></line></svg></a>
+                <a id="btnNext"><svg width="40" height="20"><circle style="fill:white" cx="20" r="8" cy="12"></circle><path stroke="black" stroke-width="1" d="M18,8 l4,4 l-4,4 Z"></path><path stroke="black" stroke-width="1" d="M23,7 v10"></path></svg></a>
+            </div>
         </div>
         <audio id="audio" controls></audio>
     </div>
