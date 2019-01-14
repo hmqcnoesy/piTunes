@@ -28,7 +28,7 @@
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
         }
 
-        input[type="text"] {
+        input[type="search"] {
             border-radius: 5px;
             border: none;
             padding: 0.3em;
@@ -226,7 +226,7 @@
     <div id="divAlbums"></div>
 
     <div id="divPlayer">
-        <div id="divSearch" style="display:none"><input type="text" id="txtSearch"></div>
+        <div id="divSearch" style="display:none"><input type="search" id="txtSearch"></div>
         <div id="divNowPlaying">
             <div id="divImg"><img src=""></div>
             <div id="divInfo">
@@ -266,6 +266,7 @@
                 } else {
                     document.getElementById('txtSearch').value = '';
                     divSearch.setAttribute('style', 'display:none');
+                    filterDisplayedAlbums();
                 }
             });
             document.getElementById('txtSearch').addEventListener('input', function() {
@@ -388,24 +389,33 @@
 
 
         function filterDisplayedAlbums() {
-            var txt = document.getElementById('txtSearch').value;
-            if (txt.length <= 3) {
-                var toShow = document.querySelectorAll('#divAlbums img[style="display:none"]');
-                for (var i = 0; i < toShow.length; i++) 
-                    toShow[i].removeAttribute('style');
-            } else {
-                var searchTerms = txt.split(' ');
-                var imgs = document.querySelectorAll('#divAlbums img');
-                for (var i = 0; i < imgs.length; i++) {
-                    var tokens = imgs[i].getAttribute('src').split('/');
-                    tokens = decodeURIComponent(tokens[tokens.length-2]).split(' ');
-                    for (var j = 0; j < searchTerms.length; j++) {
-                        for (var k = 0; k < tokens.length; k++) {
-                            
-                        }
-                    }
-                }
-            }
+            var txt = document.getElementById('txtSearch').value.trim().toLowerCase();
+			if (txt.length == 0) {
+				var toShow = document.querySelectorAll('#divAlbums img');
+				for (var i = 0; i < toShow.length; i++) {
+					toShow[i].removeAttribute('style');
+				}
+				return;
+			}
+			
+			var searchTerms = txt.split(' ');
+			var imgs = document.querySelectorAll('#divAlbums img');
+			for (var i = 0; i < imgs.length; i++) {
+				var tokens = imgs[i].getAttribute('src').split('/');
+				tokens = decodeURIComponent(tokens[tokens.length-2]).toLowerCase().split(' ');
+				var searchTermsFoundCount = 0;
+				for (var j = 0; j < searchTerms.length; j++) {
+					for (var k = 0; k < tokens.length; k++) {
+						if (tokens[k].startsWith(searchTerms[j])) {
+							searchTermsFoundCount++;
+							continue;
+						}
+					}
+				}
+				
+				if (searchTermsFoundCount == searchTerms.length) imgs[i].removeAttribute('style');
+				else imgs[i].setAttribute('style', 'display:none');
+			}
         }
 
 
