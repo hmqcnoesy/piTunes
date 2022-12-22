@@ -243,7 +243,7 @@
     </div>
 
     <script>
-        var audioFileExts = ['mp3','m4a'];
+        var audioFileExts = ['mp3','m4a','opus'];
         var albums = [];
         var queuedTracks = [];
         var playedTracks = [];
@@ -350,7 +350,7 @@
 
                     for (var i = 0; i < links.length; i++) {
                         var href = links[i].getAttribute('href');
-                        var ext = href.substr(href.length - 3).toLowerCase();
+                        var ext = href.substr(href.lastIndexOf('.')+1).toLowerCase();
                         if (href == '../' || audioFileExts.indexOf(ext) < 0) continue;
                         tracks.push(href);
                     }
@@ -431,7 +431,7 @@
 
                     for (var i = 0; i < links.length; i++) {
                         var href = links[i].getAttribute('href');
-                        var ext = href.substr(href.length - 3).toLowerCase();
+                        var ext = href.substr(href.lastIndexOf('.')+1).toLowerCase();
                         if (href == '../' || audioFileExts.indexOf(ext) < 0) continue;
                         var div = document.createElement('div');
                         div.classList.add('list');
