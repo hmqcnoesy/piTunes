@@ -243,7 +243,7 @@
     </div>
 
     <script>
-        var audioFileExts = ['mp3','m4a','opus'];
+        var audioFileExts = ['mp3','m4a','opus','mp3/','m4a/','opus/'];
         var albums = [];
         var queuedTracks = [];
         var playedTracks = [];
@@ -373,10 +373,10 @@
             var a = document.createElement('a');
             a.href = trackUrl;
             var path = a.pathname;
-            var parts = path.substr(1).split('/');
-            document.querySelector('#divNowPlaying img').src = parts[0] + '/' + parts[1] + '/Folder.jpg';
-            document.getElementById('divAlbumInfo').innerText = decodeURIComponent(parts[1]);
-            document.getElementById('divTrackInfo').innerText = decodeURIComponent(parts[2].substr(0, parts[2].length-4));
+            var parts = path.replace(/\/$/, '').substr(1).split('/');
+            document.querySelector('#divNowPlaying img').src = trackUrl.replace(parts[parts.length-1], 'Folder.jpg');
+            document.getElementById('divAlbumInfo').innerText = decodeURIComponent(parts[parts.length-2]);
+            document.getElementById('divTrackInfo').innerText = decodeURIComponent(parts[parts.length-1].substr(0, parts[parts.length-1].length-4));
         }
 
 
@@ -449,9 +449,12 @@
                     }
 
                     var a = document.createElement('a');
+                    a.href = url;
+                    var path = a.pathname;
+                    var parts = path.replace(/\/$/, '').substr(1).split('/');
                     a.setAttribute('href', url);
                     a.setAttribute('data-href', url);
-                    var title = decodeURIComponent(a.pathname.replace('/Music/', '').replace('/', ''));
+                    var title = decodeURIComponent(parts[parts.length - 1]);
                     if (title.substr(0,1) == '-') title = title.substr(1);
                     a.innerHTML = title;
                     a.removeAttribute('href');
